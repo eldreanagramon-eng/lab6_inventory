@@ -22,4 +22,15 @@ class Product extends Model
     {
         return $this->hasMany(InventoryTransaction::class);
     }
+        public function isLowStock(): bool
+    {
+        return $this->quantity <= $this->reorder_level;
+    }
+
+    public function getStockStatusAttribute(): string
+    {
+        if ($this->quantity <= 0) return 'Out of Stock';
+        if ($this->quantity <= $this->reorder_level) return 'Low Stock';
+        return 'In Stock';
+    }
 }

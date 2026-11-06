@@ -16,6 +16,11 @@
                         {{ __('Dashboard') }}
                     </x-nav-link>
                     
+                    <!-- PRODUCTS LINK -->
+                    <x-nav-link :href="route('products.index')" :active="request()->routeIs('products.*')">
+                        {{ __('Products') }}
+                    </x-nav-link>
+
                     <!-- TRANSACTIONS LINK -->
                     <x-nav-link :href="route('transactions.index')" :active="request()->routeIs('transactions.index')">
                         {{ __('Transactions') }}
@@ -26,7 +31,7 @@
                         {{ __('Adjust Stock') }}
                     </x-nav-link>
 
-                    <!-- REPORTS LINK (ADDED HERE) -->
+                    <!-- REPORTS LINK -->
                     <x-nav-link :href="route('transactions.reports')" :active="request()->routeIs('transactions.reports')">
                         {{ __('Reports') }}
                     </x-nav-link>
@@ -100,6 +105,11 @@
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
 
+            <!-- MOBILE PRODUCTS LINK -->
+            <x-responsive-nav-link :href="route('products.index')" :active="request()->routeIs('products.*')">
+                {{ __('Products') }}
+            </x-responsive-nav-link>
+
             <x-responsive-nav-link :href="route('transactions.index')" :active="request()->routeIs('transactions.index')">
                 {{ __('Transactions') }}
             </x-responsive-nav-link>
@@ -109,7 +119,7 @@
                 {{ __('Adjust Stock') }}
             </x-responsive-nav-link>
 
-            <!-- MOBILE REPORTS LINK (ADDED HERE) -->
+            <!-- MOBILE REPORTS LINK -->
             <x-responsive-nav-link :href="route('transactions.reports')" :active="request()->routeIs('transactions.reports')">
                 {{ __('Reports') }}
             </x-responsive-nav-link>

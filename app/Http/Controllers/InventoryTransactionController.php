@@ -6,15 +6,36 @@ use App\Models\InventoryTransaction;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB; // Added for the DB::raw in the reports method
+use Illuminate\Support\Facades\DB;
 
 class InventoryTransactionController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        // Paginate 20 items per page, load product and user to prevent N+1 queries
-        $transactions = InventoryTransaction::with(['product', 'user'])->recent()->paginate(20);
-        return view('transactions.index', compact('transactions'));
+        $query = InventoryTransaction::with(['product', 'user'])->recent();
+
+        // Filter by Product
+        if ($request->filled('product_id')) {
+            $query->where('product_id', $request->product_id);
+        }
+
+        // Filter by Type
+        if ($request->filled('type')) {
+            $query->where('type', $request->type);
+        }
+
+        // Filter by Date Range
+        if ($request->filled('start_date')) {
+            $query->whereDate('created_at', '>=', $request->start_date);
+        }
+        if ($request->filled('end_date')) {
+            $query->whereDate('created_at', '<=', $request->end_date);
+        }
+
+        $transactions = $query->paginate(20);
+        $products = Product::all(); // For the filter dropdown
+
+        return view('transactions.index', compact('transactions', 'products'));
     }
 
     public function create()
@@ -37,7 +58,7 @@ class InventoryTransactionController extends Controller
             // Create the transaction. The Observer will handle the product quantity update.
             InventoryTransaction::create([
                 'product_id' => $request->product_id,
-                'user_id' => Auth::id(), // The currently logged-in user
+                'user_id' => Auth::id(),
                 'type' => $request->type,
                 'quantity' => $request->quantity,
                 'reference_number' => $request->reference_number,
@@ -60,7 +81,6 @@ class InventoryTransactionController extends Controller
 
     public function destroy(InventoryTransaction $transaction)
     {
-        // Note: Deleting a transaction does not automatically reverse the stock in this basic setup.
         $transaction->delete();
         return redirect()->route('transactions.index')->with('success', 'Transaction deleted.');
     }
@@ -76,7 +96,7 @@ class InventoryTransactionController extends Controller
         $request->validate([
             'product_id' => 'required|exists:products,id',
             'physical_count' => 'required|integer|min:0',
-            'notes' => 'required|string', // Reason for adjustment
+            'notes' => 'required|string',
         ]);
 
         $product = Product::findOrFail($request->product_id);
@@ -84,7 +104,6 @@ class InventoryTransactionController extends Controller
         // Calculate the difference (Physical - System)
         $difference = $request->physical_count - $product->quantity;
 
-        // If there is no difference, just redirect back
         if ($difference == 0) {
             return redirect()->route('transactions.index')->with('success', 'No adjustment needed. Counts match.');
         }
@@ -101,7 +120,6 @@ class InventoryTransactionController extends Controller
         return redirect()->route('transactions.index')->with('success', 'Stock adjusted successfully.');
     }
 
-    // --- ADDED THE REPORTS METHOD HERE ---
     public function reports()
     {
         $lowStockProducts = Product::whereColumn('quantity', '<=', 'reorder_level')->get();

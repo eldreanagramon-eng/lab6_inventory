@@ -19,4 +19,16 @@ class DashboardController extends Controller
             'recent_transactions' => InventoryTransaction::with('product')->recent()->take(5)->get()
         ]);
     }
-}
+
+    // Added for Part 7, Step 1
+    public function lowStock()
+    {
+        return response()->json(Product::whereColumn('quantity', '<=', 'reorder_level')->get());
+    }
+
+    // Added for Part 7, Step 1
+    public function recentTransactions()
+    {
+        return response()->json(InventoryTransaction::with('product')->recent()->take(10)->get());
+    }
+}   

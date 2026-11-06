@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\InventoryTransactionController;
+use App\Http\Controllers\ProductController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -24,8 +25,13 @@ Route::middleware('auth')->group(function () {
     // Inventory Resource Routes
     Route::resource('transactions', InventoryTransactionController::class)->except(['edit', 'update']);
     
-    // API Route for AJAX Polling
+    // Product Resource Routes
+    Route::resource('products', ProductController::class)->except(['destroy']);
+
+    // API Routes for AJAX Polling
     Route::get('/api/dashboard/stats', [DashboardController::class, 'stats']);
+    Route::get('/api/products/low-stock', [DashboardController::class, 'lowStock']);
+    Route::get('/api/transactions/recent', [DashboardController::class, 'recentTransactions']);
 
     // Profile Routes
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
